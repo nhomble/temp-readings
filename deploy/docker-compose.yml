@@ -104,6 +104,6 @@ services:
     depends_on:
       - kafka-rest
     environment:
-      KAFKA_REST_PROXY_URL: http://kafka-rest:38082
-      PROXY: "false"
+      KAFKA_REST_PROXY_URL: http://kafka-rest:38082/
+      PROXY: "true"
       PORT: 8010
