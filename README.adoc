@@ -4,9 +4,27 @@
 [.lead] My final project for the JHU hadoop-class which does a small introduction to some Apache projects in the big data space.
 
 == Setup
+
 [source,shell script]
 ----
 $ cd deploy/
 $ docker-compose up -d
 $ create-topic SOME_TOPIC
+----
+
+Setup your [Kaggle] credentials by downloading kaggle.json with your own credentials.
+
+[source,shell script]
+----
+$ cd deploy/
+$ download-data.sh
+$ cat temperature-readings-iot-devices.zip
+----
+
+Start publishing 'real time' data to kafka by running
+
+[source,shell script]
+----
+$ cd deploy/
+$ publish.sh SOME_TOPIC
 ----
