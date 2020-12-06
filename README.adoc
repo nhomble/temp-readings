@@ -8,6 +8,7 @@
 [source,shell script]
 ----
 $ cd deploy/
+$ source .env
 $ docker-compose up -d
 $ create-topic SOME_TOPIC
 ----
