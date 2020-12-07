@@ -53,7 +53,7 @@ services:
     ports:
       - "32181:32181"
     environment:
-      ZOOKEEPER_CLIENT_PORT: 32181
+      ZOOKEEPER_CLIENT_PORT: ${PORT_DOCKER_ZK}
       ZOOKEEPER_TICK_TIME: 2000
       ZOOKEEPER_SYNC_LIMIT: 2
 
@@ -66,7 +66,7 @@ services:
       - kafka-zookeeper
     environment:
       KAFKA_BROKER_ID: 1
-      KAFKA_ZOOKEEPER_CONNECT: kafka-zookeeper:32181
+      KAFKA_ZOOKEEPER_CONNECT: kafka-zookeeper:${PORT_DOCKER_ZK}
       KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:29092
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
 
@@ -106,4 +106,4 @@ services:
     environment:
       KAFKA_REST_PROXY_URL: http://kafka-rest:38082/
       PROXY: "true"
-      PORT: 8010
+      PORT: ${PORT_DOCKER_UI}

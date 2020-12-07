@@ -1,0 +1,1 @@
+storm jar temp-readings-1.0-SNAPSHOT.jar io.github.nhomble.storm.temp.TemperatureTopology

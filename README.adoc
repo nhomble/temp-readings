@@ -8,8 +8,7 @@
 [source,shell script]
 ----
 $ cd deploy/
-$ source .env
-$ docker-compose up -d
+$ docker-compose --env-file .env up -d
 $ create-topic SOME_TOPIC
 ----
 
@@ -29,3 +28,30 @@ Start publishing 'real time' data to kafka by running
 $ cd deploy/
 $ publish.sh SOME_TOPIC
 ----
+
+Build our topology jar
+[source, shell script]
+----
+$ mvn clean package
+$ cp ./path/to/target/jar ./deploy/nimbus/deploy
+----
+
+If you are using the deploy/ directory as is, then the docker-compose will
+mount deploy/nimbus/deploy to /deploy on the container. So
+open a shell in that container
+
+[source, shell script]
+----
+$ docker exec -it nimbus /bin/bash
+----
+
+Once you are in the container, then the last step will be to submit
+the topology into storm. To make it easier to script, I just added a run.sh into
+that location so that you can just exec in the shell.
+[source, shell script]
+----
+# cd /deploy
+# sh run.sh
+----
+
+Finally, you can observe the topology via storm-ui.
