@@ -55,3 +55,11 @@ that location so that you can just exec in the shell.
 ----
 
 Finally, you can observe the topology via storm-ui.
+
+To kill a running topology, just open a shell in the nimbus container and run:
+[source, shell script]
+----
+# TOPOLOGY_NAME=temperature
+# WAIT_SECONDS=1
+# storm kill $TOPOLOGY_NAME -w $WAIT_SECONDS
+----
