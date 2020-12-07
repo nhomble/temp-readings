@@ -19,12 +19,12 @@ import java.util.Map;
 public class TemperatureTopology extends ConfigurableTopology {
 
     public static void main(String[] args) {
-//        ConfigurableTopology.start(new TemperatureTopology(), args);
+        ConfigurableTopology.start(new TemperatureTopology(), args);
     }
 
     protected int run(String[] args) throws Exception {
         String topologyName = "temperature";
-        if (args.length != 1) {
+        if (args.length >= 1) {
             topologyName = args[0];
         }
         TopologyBuilder builder = new TopologyBuilder();
