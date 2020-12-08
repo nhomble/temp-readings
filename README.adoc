@@ -51,7 +51,8 @@ that location so that you can just exec in the shell.
 [source, shell script]
 ----
 # cd /deploy
-# sh run.sh
+# TYPE=temp
+# sh run_${TYPE}.sh
 ----
 
 Finally, you can observe the topology via storm-ui.

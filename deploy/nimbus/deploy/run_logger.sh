@@ -1,0 +1,1 @@
+storm jar simple-logger-1.0-SNAPSHOT.jar io.github.nhomble.storm.example.logger.LoggingTopology
