@@ -29,7 +29,8 @@ public class LoggingTopology extends ConfigurableTopology {
         builder.setBolt("exclaim1", new ExclamationBolt(), 3).shuffleGrouping("word");
         builder.setBolt("exclaim2", new ExclamationBolt(), 2).shuffleGrouping("exclaim1");
 
-        conf.setDebug(false);
+        conf.put("storm.log.dir", "/logs");
+        conf.setDebug(true);
         conf.setNumWorkers(3);
 
         return submit(topologyName, conf, builder);
