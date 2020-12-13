@@ -15,7 +15,7 @@ import java.util.Map;
 public class ComputeAverageBolt extends BaseRichBolt {
 
     private long count = 0;
-    private long sum = 0;
+    private double sum = 0;
     private OutputCollector collector;
 
     @Override
@@ -28,7 +28,7 @@ public class ComputeAverageBolt extends BaseRichBolt {
         int val = input.getInteger(0);
         sum += val;
         count += 1;
-        collector.emit(input, new Values(sum / count, count));
+        collector.emit(input, new Values(Double.toString(sum / count), Long.toString(count)));
         log.info("New average={}", sum / count);
         collector.ack(input);
     }

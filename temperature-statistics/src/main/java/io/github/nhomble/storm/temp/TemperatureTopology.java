@@ -49,12 +49,12 @@ public class TemperatureTopology extends ConfigurableTopology {
 
         builder.setBolt("avgInPublish", new KafkaBolt<>()
                         .withProducerProperties(producerProps)
-                        .withTupleToKafkaMapper(new FieldNameBasedTupleToKafkaMapper<>())
+                        .withTupleToKafkaMapper(new FieldNameBasedTupleToKafkaMapper<>("count", "average"))
                         .withTopicSelector(args[2]),
                 1).shuffleGrouping("avgIn");
         builder.setBolt("avgOutPublish", new KafkaBolt<>()
                         .withProducerProperties(producerProps)
-                        .withTupleToKafkaMapper(new FieldNameBasedTupleToKafkaMapper<>())
+                        .withTupleToKafkaMapper(new FieldNameBasedTupleToKafkaMapper<>("count", "average"))
                         .withTopicSelector(args[3]),
                 1).shuffleGrouping("avgOut");
         conf.setNumWorkers(10);
