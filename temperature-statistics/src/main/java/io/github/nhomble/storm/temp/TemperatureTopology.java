@@ -1,22 +1,14 @@
 package io.github.nhomble.storm.temp;
 
+import io.github.nhomble.storm.temp.components.ComputeAverageBolt;
+import io.github.nhomble.storm.temp.components.MapperBolt;
+import io.github.nhomble.storm.temp.components.RouterBolt;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.storm.ILocalCluster;
+import org.apache.storm.kafka.bolt.KafkaBolt;
 import org.apache.storm.kafka.spout.KafkaSpout;
 import org.apache.storm.kafka.spout.KafkaSpoutConfig;
-import org.apache.storm.task.OutputCollector;
-import org.apache.storm.task.TopologyContext;
-import org.apache.storm.testing.TestWordSpout;
 import org.apache.storm.topology.ConfigurableTopology;
-import org.apache.storm.topology.OutputFieldsDeclarer;
 import org.apache.storm.topology.TopologyBuilder;
-import org.apache.storm.topology.base.BaseRichBolt;
-import org.apache.storm.tuple.Fields;
-import org.apache.storm.tuple.Tuple;
-import org.apache.storm.tuple.Values;
-import org.slf4j.Logger;
-
-import java.util.Map;
 
 @Slf4j
 public class TemperatureTopology extends ConfigurableTopology {
@@ -25,42 +17,30 @@ public class TemperatureTopology extends ConfigurableTopology {
         ConfigurableTopology.start(new TemperatureTopology(), args);
     }
 
-    protected int run(String[] args) throws Exception {
-        String topologyName = "temperature";
-        if (args.length >= 1) {
-            topologyName = args[0];
-        }
-        TopologyBuilder builder = new TopologyBuilder();
-
-        builder.setSpout("word", new TestWordSpout(), 10);
-        builder.setBolt("exclaim1", new ExclamationBolt(), 3).shuffleGrouping("word");
-        builder.setBolt("exclaim2", new ExclamationBolt(), 2).shuffleGrouping("exclaim1");
-
-        conf.setDebug(true);
-        conf.setNumWorkers(3);
-
-        return submit(topologyName, conf, builder);
+    private void usage() {
+        System.err.println("[bootstrap servers] [topic] [out topic] [in topic]");
     }
 
-    public static class ExclamationBolt extends BaseRichBolt {
-        OutputCollector collector;
-
-        @Override
-        public void prepare(Map<String, Object> conf, TopologyContext context, OutputCollector collector) {
-            this.collector = collector;
+    protected int run(String[] args) throws Exception {
+        String topologyName = "temperature";
+        if (args.length != 4) {
+            usage();
+            return -1;
         }
+        TopologyBuilder builder = new TopologyBuilder();
+        KafkaSpoutConfig<String, String> config = KafkaSpoutConfig
+                .builder(args[0], args[1])
+                .build();
+        log.info("Kafka properties={}", config.getKafkaProps());
+        builder.setSpout("data", new KafkaSpout<>(config), 1);
+        builder.setBolt("readings", new MapperBolt(), 1).shuffleGrouping("data");
+        builder.setBolt("router", new RouterBolt(), 1).shuffleGrouping("readings");
+        builder.setBolt("avgIn", new ComputeAverageBolt(), 1).shuffleGrouping("router", RouterBolt.STREAM_IN);
+        builder.setBolt("avgOut", new ComputeAverageBolt(), 1).shuffleGrouping("router", RouterBolt.STREAM_OUT);
+        builder.setBolt("avgInPublish", new KafkaBolt<>().withTopicSelector(args[2]), 1).shuffleGrouping("avgIn");
+        builder.setBolt("avgOutPublish", new KafkaBolt<>().withTopicSelector(args[3]), 1).shuffleGrouping("avgOut");
+        conf.setNumWorkers(10);
 
-        @Override
-        public void execute(Tuple tuple) {
-            log.info("Executing {}", tuple);
-            collector.emit(tuple, new Values(tuple.getString(0) + "!!!"));
-            collector.ack(tuple);
-        }
-
-        @Override
-        public void declareOutputFields(OutputFieldsDeclarer declarer) {
-            declarer.declare(new Fields("word"));
-        }
-
+        return submit(topologyName, conf, builder);
     }
 }

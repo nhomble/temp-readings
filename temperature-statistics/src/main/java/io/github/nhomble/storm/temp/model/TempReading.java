@@ -1,5 +1,12 @@
-package io.github.nhomble.storm.temp;
+package io.github.nhomble.storm.temp.model;
 
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
+
+@Getter
+@Setter
+@ToString
 public class TempReading {
     private String description;
 
