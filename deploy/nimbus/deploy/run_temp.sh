@@ -1,1 +1,1 @@
-storm jar temp-readings-1.0-SNAPSHOT.jar io.github.nhomble.storm.temp.TemperatureTopology
+storm jar temperature-statistics-1.0-SNAPSHOT-jar-with-dependencies.jar io.github.nhomble.storm.temp.TemperatureTopology kafka:29092 input_topic out_topic in_topic
