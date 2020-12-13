@@ -5,10 +5,13 @@ import io.github.nhomble.storm.temp.components.MapperBolt;
 import io.github.nhomble.storm.temp.components.RouterBolt;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.storm.kafka.bolt.KafkaBolt;
+import org.apache.storm.kafka.bolt.mapper.FieldNameBasedTupleToKafkaMapper;
 import org.apache.storm.kafka.spout.KafkaSpout;
 import org.apache.storm.kafka.spout.KafkaSpoutConfig;
 import org.apache.storm.topology.ConfigurableTopology;
 import org.apache.storm.topology.TopologyBuilder;
+
+import java.util.Properties;
 
 @Slf4j
 public class TemperatureTopology extends ConfigurableTopology {
@@ -37,8 +40,23 @@ public class TemperatureTopology extends ConfigurableTopology {
         builder.setBolt("router", new RouterBolt(), 1).shuffleGrouping("readings");
         builder.setBolt("avgIn", new ComputeAverageBolt(), 1).shuffleGrouping("router", RouterBolt.STREAM_IN);
         builder.setBolt("avgOut", new ComputeAverageBolt(), 1).shuffleGrouping("router", RouterBolt.STREAM_OUT);
-        builder.setBolt("avgInPublish", new KafkaBolt<>().withTopicSelector(args[2]), 1).shuffleGrouping("avgIn");
-        builder.setBolt("avgOutPublish", new KafkaBolt<>().withTopicSelector(args[3]), 1).shuffleGrouping("avgOut");
+
+        Properties producerProps = new Properties();
+        producerProps.put("bootstrap.servers", args[0]);
+        producerProps.put("request.required.acks", "1");
+        producerProps.put("key.serializer", "org.apache.kafka.common.serialization.StringSerializer");
+        producerProps.put("value.serializer", "org.apache.kafka.common.serialization.StringSerializer");
+
+        builder.setBolt("avgInPublish", new KafkaBolt<>()
+                        .withProducerProperties(producerProps)
+                        .withTupleToKafkaMapper(new FieldNameBasedTupleToKafkaMapper<>())
+                        .withTopicSelector(args[2]),
+                1).shuffleGrouping("avgIn");
+        builder.setBolt("avgOutPublish", new KafkaBolt<>()
+                        .withProducerProperties(producerProps)
+                        .withTupleToKafkaMapper(new FieldNameBasedTupleToKafkaMapper<>())
+                        .withTopicSelector(args[3]),
+                1).shuffleGrouping("avgOut");
         conf.setNumWorkers(10);
 
         return submit(topologyName, conf, builder);
