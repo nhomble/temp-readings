@@ -1,10 +1,28 @@
 version: '3.1'
 
 services:
+  zk-ui:
+    image: tobilg/zookeeper-webui
+    ports:
+    - "7080:7080"
+    environment:
+      ZK_DEFAULT_NODE: zookeeper:2181
+      HTTP_PORT: 7080
+    links:
+      - zookeeper
+
   zookeeper:
     image: zookeeper
     container_name: zookeeper
     restart: always
+    ports:
+      - "2181:2181"
+      - "2888:2888"
+      - "3888:3888"
+      - "9090:9090"
+    environment:
+      ZOO_INIT_LIMIT: 20
+      ZOO_CFG_EXTRA: "admin.serverPort=9090"
 
   nimbus:
     image: storm
@@ -32,7 +50,14 @@ services:
     links:
       - nimbus
       - zookeeper
+      - kafka
     restart: always
+    ports:
+      - "8000:8000"
+      - "6700:6700"
+      - "6701:6701"
+      - "6702:6702"
+      - "6703:6703"
 
   storm-ui:
     image: storm
