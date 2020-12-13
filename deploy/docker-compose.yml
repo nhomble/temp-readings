@@ -27,7 +27,7 @@ services:
   nimbus:
     image: storm
     container_name: nimbus
-    command: storm nimbus
+    command: storm nimbus -c storm.zookeeper.servers='["zookeeper"]'
     depends_on:
       - zookeeper
     links:
@@ -43,7 +43,7 @@ services:
   supervisor:
     image: storm
     container_name: supervisor
-    command: storm supervisor
+    command: storm supervisor -c storm.zookeeper.servers='["zookeeper"]'
     depends_on:
       - nimbus
       - zookeeper
