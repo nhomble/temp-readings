@@ -13,7 +13,7 @@ post_data() {
           {
             "description": "$description",
             "timestamp": "$timestamp",
-            "temperature": "temperature",
+            "temperature": "$temperature",
             "direction": "$direction"
           }
         }
